@@ -11,6 +11,8 @@ interface Scout {
   jogadasRuins?: number;
   golsContra?: number;
   vitorias?: number;
+  defesas?: number;
+  frangos?: number;
   actions: { action: string; time: number }[];
 }
 
@@ -198,6 +200,14 @@ export class AppComponent implements OnInit {
             scout.assistencias = Math.max(0, (scout.assistencias || 0) - 1);
             scout.pontos -= 2;
             break;
+          case 'defesa':
+            scout.defesas = Math.max(0, (scout.defesas || 0) - 1);
+            scout.pontos -= 3;
+            break;
+          case 'frango':
+            scout.frangos = Math.max(0, (scout.frangos || 0) - 1);
+            scout.pontos += 1;
+            break;
         }
       }
     }
@@ -328,6 +338,14 @@ export class AppComponent implements OnInit {
       case 'passe':
         scout.assistencias = (scout.assistencias || 0) + 1;
         scout.pontos += 2;
+        break;
+      case 'defesa':
+        scout.defesas = (scout.defesas || 0) + 1;
+        scout.pontos += 3;
+        break;
+      case 'frango':
+        scout.frangos = (scout.frangos || 0) + 1;
+        scout.pontos -= 1;
         break;
     }
 

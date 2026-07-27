@@ -116,6 +116,8 @@ export class TeamsDisplayComponent implements OnInit, OnDestroy {
       case 'ruim': return '⚠️';
       case 'contra': return '❌';
       case 'passe': return '🅰️';
+      case 'defesa': return '🛡️';
+      case 'frango': return '🐔';
       default: return '';
     }
   }
