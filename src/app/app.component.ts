@@ -14,6 +14,8 @@ interface Scout {
   actions: { action: string; time: number }[];
 }
 
+export type DrawMode = 'redistribuir' | 'sorteio';
+
 interface GameState {
   teams: Team[];
   remainingPlayers: string[];
@@ -24,6 +26,7 @@ interface GameState {
   allGoalkeepers: string[];
   gameTimeSecs: number;
   goalLimit: number;
+  drawMode: DrawMode;
 }
 
 const GAME_STATE_KEY = 'gameState';
@@ -48,6 +51,7 @@ export class AppComponent implements OnInit {
   lastActionsByPlayer: { [player: string]: string[] } = {};
   gameTimeSecs: number = 420;
   goalLimit: number = 2;
+  drawMode: DrawMode = 'redistribuir';
 
   constructor(private storage: StorageService) {}
 
@@ -63,6 +67,7 @@ export class AppComponent implements OnInit {
       this.allGoalkeepers = saved.allGoalkeepers ?? [];
       this.gameTimeSecs = saved.gameTimeSecs ?? 420;
       this.goalLimit = saved.goalLimit ?? 2;
+      this.drawMode = saved.drawMode ?? 'redistribuir';
       this.ensureAllPlayersInScouts();
     }
   }
@@ -78,6 +83,7 @@ export class AppComponent implements OnInit {
       allGoalkeepers: this.allGoalkeepers,
       gameTimeSecs: this.gameTimeSecs,
       goalLimit: this.goalLimit,
+      drawMode: this.drawMode,
     };
     this.storage.save(GAME_STATE_KEY, state);
   }
@@ -110,6 +116,7 @@ export class AppComponent implements OnInit {
     this.playerCount = 5;
     this.gameTimeSecs = 420;
     this.goalLimit = 2;
+    this.drawMode = 'redistribuir';
     this.activeTab = 'selection';
     this.resetDbModalAberto = false;
     this.resetDbSenha = '';

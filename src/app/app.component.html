@@ -52,6 +52,7 @@
         [lastActionsByPlayer]="lastActionsByPlayer"
         [gameTimeSecs]="gameTimeSecs"
         [goalLimit]="goalLimit"
+        [drawMode]="drawMode"
         (playerAction)="onPlayerAction($event)"
         (removeAction)="onRemovePlayerAction($event)"
         (winnerDeclared)="onMatchWinner($event)"
@@ -151,6 +152,43 @@
             [(ngModel)]="goalLimit"
             (ngModelChange)="saveConfig()"
             class="config-input">
+        </div>
+
+        <div class="config-item">
+          <label>🤝 O que acontece quando dá empate</label>
+          <div class="config-radio-group">
+            <label class="config-radio" [class.selected]="drawMode === 'redistribuir'">
+              <input
+                type="radio"
+                name="drawMode"
+                value="redistribuir"
+                [(ngModel)]="drawMode"
+                (ngModelChange)="saveConfig()">
+              <span class="config-radio-body">
+                <strong>Redistribuir os times</strong>
+                <small>
+                  Quem estava no banco entra como Time 1 e os que jogaram são
+                  embaralhados: metade continua em campo, metade vai descansar.
+                </small>
+              </span>
+            </label>
+
+            <label class="config-radio" [class.selected]="drawMode === 'sorteio'">
+              <input
+                type="radio"
+                name="drawMode"
+                value="sorteio"
+                [(ngModel)]="drawMode"
+                (ngModelChange)="saveConfig()">
+              <span class="config-radio-body">
+                <strong>Sortear o time que permanece</strong>
+                <small>
+                  Sorteia um dos dois times para continuar em campo. O outro sai
+                  inteiro para o banco e o banco entra inteiro no lugar dele.
+                </small>
+              </span>
+            </label>
+          </div>
         </div>
 
         <div class="config-item config-danger">

@@ -5,17 +5,33 @@
       <h2>⏱️ Tempo de Jogo</h2>
       <div class="timer-value">{{ formattedTime }}</div>
       <div class="timer-buttons">
-        <button (click)="toggleTimer()" [class.playing]="isRunning" class="btn-timer-toggle">
+        <button
+          (click)="toggleTimer()"
+          [class.playing]="isRunning"
+          [disabled]="aguardandoResultado"
+          [title]="aguardandoResultado ? 'Marque o vencedor ou o empate para iniciar a próxima partida' : ''"
+          class="btn-timer-toggle">
           {{ isRunning ? '⏸️ Pausar' : '▶️ Iniciar' }}
         </button>
-        <button (click)="confirmResetTimerAberto = true" class="btn-timer-reset">🔄 Resetar</button>
+        <button
+          (click)="abrirResetTimer()"
+          [disabled]="isRunning || aguardandoResultado"
+          [title]="aguardandoResultado ? 'Marque o vencedor ou o empate antes de resetar' : (isRunning ? 'Pause o cronômetro para poder resetar' : 'Resetar o tempo')"
+          class="btn-timer-reset">🔄 Resetar</button>
       </div>
+      <p class="timer-hint timer-hint-alerta" *ngIf="aguardandoResultado">
+        ⏹️ Tempo esgotado! Marque o <strong>vencedor</strong> ou o <strong>empate</strong> para liberar a próxima partida.
+      </p>
+      <p class="timer-hint" *ngIf="isRunning">⏸️ Pause o cronômetro para poder resetar o tempo.</p>
     </div>
   </div>
 
 
 
   <h2>Times Montados</h2>
+  <div class="sorteio-aviso" *ngIf="ultimoSorteio">
+    🎲 Empate: sorteado o <strong>{{ ultimoSorteio }}</strong> para permanecer em campo.
+  </div>
   <div class="teams-grid" *ngIf="teams.length > 0">
     <div class="team-card" *ngFor="let team of teams">
       <div class="team-content">
@@ -100,9 +116,9 @@
   <div class="modal-backdrop" *ngIf="confirmResetTimerAberto">
     <div class="modal modal-confirm">
       <h2>⏱️ Resetar Tempo</h2>
-      <p>Tem certeza que deseja resetar o cronômetro para 7:00?</p>
+      <p>Tem certeza que deseja resetar o cronômetro para {{ formattedGameTime }}?</p>
       <div class="modal-confirm-buttons">
-        <button (click)="resetTimer(); confirmResetTimerAberto = false" class="btn-confirm-yes">✅ Confirmar</button>
+        <button (click)="confirmarResetTimer()" class="btn-confirm-yes">✅ Confirmar</button>
         <button (click)="confirmResetTimerAberto = false" class="btn-confirm-no">❌ Cancelar</button>
       </div>
     </div>
@@ -112,7 +128,11 @@
   <div class="modal-backdrop" *ngIf="confirmDrawAberto">
     <div class="modal modal-confirm">
       <h2>⚠️ Confirmar Empate</h2>
-      <p>Tem certeza que deseja marcar empate? Os times serão redistribuídos.</p>
+      <p *ngIf="drawMode === 'sorteio'">
+        Tem certeza que deseja marcar empate? Será sorteado o time que permanece
+        em campo; o outro sai inteiro e o banco entra no lugar.
+      </p>
+      <p *ngIf="drawMode !== 'sorteio'">Tem certeza que deseja marcar empate? Os times serão redistribuídos.</p>
       <div class="modal-confirm-buttons">
         <button (click)="setDraw(); confirmDrawAberto = false" class="btn-confirm-yes">✅ Confirmar</button>
         <button (click)="confirmDrawAberto = false" class="btn-confirm-no">❌ Cancelar</button>

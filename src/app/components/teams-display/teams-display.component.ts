@@ -23,6 +23,7 @@ export class TeamsDisplayComponent implements OnInit, OnDestroy {
   @Input() playCount: number = 0;
   @Input() gameTimeSecs: number = 420;
   @Input() goalLimit: number = 2;
+  @Input() drawMode: 'redistribuir' | 'sorteio' = 'redistribuir';
   @Output() playerAction: EventEmitter<{player: string, action: string}> = new EventEmitter();
   @Input() lastActionsByPlayer: { [player: string]: string[] } = {};
   @Output() winnerDeclared: EventEmitter<{ winnerTeam: Team, teams: Team[], remainingPlayers: string[] }> = new EventEmitter();
@@ -40,6 +41,7 @@ export class TeamsDisplayComponent implements OnInit, OnDestroy {
   modalAberto = false;
   confirmDrawAberto = false;
   confirmResetTimerAberto = false;
+  ultimoSorteio = '';
 
   constructor(private storage: StorageService) {}
 
@@ -178,7 +180,7 @@ export class TeamsDisplayComponent implements OnInit, OnDestroy {
 
 
   startTimer(): void {
-    if (this.isRunning || this.timeRemaining === 0) return;
+    if (this.isRunning || this.timeRemaining === 0 || this.aguardandoResultado) return;
 
     this.isRunning = true;
     this.intervalId = setInterval(() => {
@@ -201,6 +203,27 @@ export class TeamsDisplayComponent implements OnInit, OnDestroy {
     this.storage.save(TIMER_KEY, { timeRemaining: this.timeRemaining });
   }
 
+  // Tempo acabou e a partida ainda não foi encerrada: é obrigatório marcar
+  // vencedor ou empate antes de liberar uma nova partida.
+  get aguardandoResultado(): boolean {
+    return this.timeUp && this.teams.length >= 2;
+  }
+
+  // Reset manual (botão): só liberado com o cronômetro parado e sem resultado
+  // pendente, para não zerar o tempo sem querer nem pular o encerramento.
+  abrirResetTimer(): void {
+    if (this.isRunning || this.aguardandoResultado) return;
+    this.confirmResetTimerAberto = true;
+  }
+
+  confirmarResetTimer(): void {
+    this.confirmResetTimerAberto = false;
+    if (this.isRunning || this.aguardandoResultado) return;
+    this.resetTimer();
+  }
+
+  // Reset interno, usado ao encerrar a partida (vencedor/empate). Continua
+  // funcionando mesmo com o cronômetro rodando.
   resetTimer(): void {
     this.pauseTimer();
     this.timeRemaining = this.gameTimeSecs;
@@ -214,11 +237,18 @@ export class TeamsDisplayComponent implements OnInit, OnDestroy {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 
+  get formattedGameTime(): string {
+    const minutes = Math.floor(this.gameTimeSecs / 60);
+    const seconds = this.gameTimeSecs % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
   isHeadToHead(player: string): boolean {
     return this.headToHeadPlayers.has(player);
   }
 
   setWinner(team: Team): void {
+    this.ultimoSorteio = '';
     team.isWinner = true;
     this.onWinnerSelected(team);
     this.teams.forEach(t => t.isWinner = false);
@@ -236,8 +266,34 @@ export class TeamsDisplayComponent implements OnInit, OnDestroy {
   }
 
   setDraw(): void {
+    // Precisa dos 2 times em campo para redistribuir ou sortear
+    if (this.teams.length < 2) return;
+
+    if (this.drawMode === 'sorteio') {
+      this.setDrawSorteio();
+    } else {
+      this.setDrawRedistribuir();
+    }
+  }
+
+  // Sorteia qual time permanece; o outro sai inteiro e o banco entra inteiro,
+  // seguindo o mesmo fluxo de quando um time vence (mas sem pontuar no rank).
+  private setDrawSorteio(): void {
+    const indiceQuePermanece = Math.floor(Math.random() * this.teams.length);
+    const timeQuePermanece = this.teams[indiceQuePermanece];
+
+    this.ultimoSorteio = timeQuePermanece.name;
+
+    this.teams.forEach(t => t.isWinner = false);
+    this.onWinnerSelected(timeQuePermanece);
+    this.resetTimer();
+    this.drawDeclared.emit({ teams: this.teams, remainingPlayers: this.remainingPlayers });
+  }
+
+  private setDrawRedistribuir(): void {
     const fixedGoalkeepers = this.teams.map(t => t.goalkeeper);
 
+    this.ultimoSorteio = '';
     this.teams.forEach(t => t.isWinner = false);
     this.teams.forEach(t => t.players.forEach(p => this.playersTeam.push(p)));
 

@@ -650,6 +650,56 @@
   border-color: #0056b3;
 }
 
+.config-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 400;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.config-radio:hover {
+  border-color: #adb5bd;
+}
+
+.config-radio.selected {
+  border-color: #007bff;
+  background-color: #f0f7ff;
+}
+
+.config-radio input[type="radio"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.config-radio-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-radio-body strong {
+  color: #333;
+  font-size: 15px;
+}
+
+.config-radio-body small {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .config-danger {
   margin-top: 16px;
   border-top: 1px solid #dee2e6;
