@@ -32,6 +32,7 @@ interface GameState {
 }
 
 const GAME_STATE_KEY = 'gameState';
+const SENHA_ADMIN = 'jonas123';
 
 @Component({
   selector: 'app-root',
@@ -104,8 +105,47 @@ export class AppComponent implements OnInit {
     this.resetDbModalAberto = true;
   }
 
+  // Alteração da regra de empate protegida por senha
+  drawModeModalAberto = false;
+  drawModePendente: DrawMode | null = null;
+  drawModeSenha = '';
+  drawModeErro = false;
+
+  solicitarDrawMode(modo: DrawMode): void {
+    if (this.drawMode === modo) return;
+    this.drawModePendente = modo;
+    this.drawModeSenha = '';
+    this.drawModeErro = false;
+    this.drawModeModalAberto = true;
+  }
+
+  confirmarDrawMode(): void {
+    if (this.drawModeSenha !== SENHA_ADMIN) {
+      this.drawModeErro = true;
+      return;
+    }
+    if (this.drawModePendente) {
+      this.drawMode = this.drawModePendente;
+      this.saveConfig();
+    }
+    this.cancelarDrawMode();
+  }
+
+  cancelarDrawMode(): void {
+    this.drawModeModalAberto = false;
+    this.drawModePendente = null;
+    this.drawModeSenha = '';
+    this.drawModeErro = false;
+  }
+
+  get drawModePendenteLabel(): string {
+    return this.drawModePendente === 'sorteio'
+      ? 'Sortear o time que permanece'
+      : 'Redistribuir os times';
+  }
+
   async confirmarResetDb(): Promise<void> {
-    if (this.resetDbSenha !== 'jonas123') {
+    if (this.resetDbSenha !== SENHA_ADMIN) {
       this.resetDbErro = true;
       return;
     }

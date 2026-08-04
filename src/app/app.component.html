@@ -157,13 +157,12 @@
         <div class="config-item">
           <label>🤝 O que acontece quando dá empate</label>
           <div class="config-radio-group">
-            <label class="config-radio" [class.selected]="drawMode === 'redistribuir'">
-              <input
-                type="radio"
-                name="drawMode"
-                value="redistribuir"
-                [(ngModel)]="drawMode"
-                (ngModelChange)="saveConfig()">
+            <button
+              type="button"
+              class="config-radio"
+              [class.selected]="drawMode === 'redistribuir'"
+              (click)="solicitarDrawMode('redistribuir')">
+              <span class="config-radio-dot" [class.checked]="drawMode === 'redistribuir'"></span>
               <span class="config-radio-body">
                 <strong>Redistribuir os times</strong>
                 <small>
@@ -171,15 +170,14 @@
                   embaralhados: metade continua em campo, metade vai descansar.
                 </small>
               </span>
-            </label>
+            </button>
 
-            <label class="config-radio" [class.selected]="drawMode === 'sorteio'">
-              <input
-                type="radio"
-                name="drawMode"
-                value="sorteio"
-                [(ngModel)]="drawMode"
-                (ngModelChange)="saveConfig()">
+            <button
+              type="button"
+              class="config-radio"
+              [class.selected]="drawMode === 'sorteio'"
+              (click)="solicitarDrawMode('sorteio')">
+              <span class="config-radio-dot" [class.checked]="drawMode === 'sorteio'"></span>
               <span class="config-radio-body">
                 <strong>Sortear o time que permanece</strong>
                 <small>
@@ -187,12 +185,35 @@
                   inteiro para o banco e o banco entra inteiro no lugar dele.
                 </small>
               </span>
-            </label>
+            </button>
           </div>
+          <p class="config-lock-hint">🔒 Alterar esta regra exige senha.</p>
         </div>
 
         <div class="config-item config-danger">
           <button (click)="abrirResetDb()" class="btn-reset-db">🗑️ Resetar banco de dados</button>
+        </div>
+      </div>
+
+      <!-- Modal senha para alterar a regra de empate -->
+      <div class="modal-backdrop" *ngIf="drawModeModalAberto">
+        <div class="modal">
+          <h2>🔒 Alterar regra de empate</h2>
+          <p>
+            Digite a senha para mudar para
+            <strong>{{ drawModePendenteLabel }}</strong>:
+          </p>
+          <input
+            type="password"
+            [(ngModel)]="drawModeSenha"
+            placeholder="Senha"
+            class="config-input"
+            (keyup.enter)="confirmarDrawMode()">
+          <p class="reset-db-erro" *ngIf="drawModeErro">Senha incorreta.</p>
+          <div class="modal-confirm-buttons">
+            <button (click)="confirmarDrawMode()" class="btn-confirm-yes">✅ Confirmar</button>
+            <button (click)="cancelarDrawMode()" class="btn-confirm-no">❌ Cancelar</button>
+          </div>
         </div>
       </div>
 
